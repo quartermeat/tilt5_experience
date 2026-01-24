@@ -1,0 +1,31 @@
+# Build directories
+build/
+out/
+cmake-build-*/
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln
+*.vcxproj
+*.vcxproj.filters
+
+# Compiled binaries
+*.exe
+*.dll
+*.lib
+*.a
+*.so
+*.dylib
+
+# Third-party binaries (keep headers, exclude libs)
+third_party/tiltfive_ndk/lib/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
