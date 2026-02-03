@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(TiltFiveFirstLight CXX)
+project(TiltFiveFirstLight C CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Tilt Five NDK paths
@@ -35,7 +35,7 @@ find_package(OpenGL REQUIRED)
 # Main executable (will be populated with HelloT5Cube source)
 add_executable(TiltFiveApp
     src/main.cpp
-    glad/OpenGL_4_6_Core/src/glad.c
+    glad/OpenGL_4_6_Core/src/gl.c
     glwrapper/src/Framebuffer.cpp
     glwrapper/src/Shader.cpp
     glwrapper/src/VertexArray.cpp
@@ -49,7 +49,7 @@ target_include_directories(TiltFiveApp PRIVATE
     ${T5_INCLUDE_DIR}
     ${GLAD_DIR}/include
     ${GLFW_DIR}/include
-    ${GLM_DIR}
+    ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/glwrapper
     ${CMAKE_SOURCE_DIR}/glapplication
     ${CMAKE_SOURCE_DIR}/t5wrapper
@@ -65,7 +65,7 @@ target_link_libraries(TiltFiveApp PRIVATE
 
 # Copy DLLs to output directory (Windows)
 if(WIN32)
-    target_compile_definitions(TiltFiveApp PRIVATE GLFW_DLL)
+    target_compile_definitions(TiltFiveApp PRIVATE GLFW_DLL GLM_ENABLE_EXPERIMENTAL)
     add_custom_command(TARGET TiltFiveApp POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${T5_LIB_DIR}/TiltFiveNative.dll"
