@@ -1,0 +1,66 @@
+# PR #1 Review Notes: Milestone 2 Paddle Control
+
+## Build Status: VERIFIED ✅
+
+After fixing build issues, the project compiles and links successfully.
+Executable: `build/Release/TiltFiveApp.exe`
+
+---
+
+## Fixes Applied
+
+### CMakeLists.txt
+1. Added C language support (`project(TiltFiveFirstLight C CXX)`) for GLAD gl.c
+2. Upgraded to C++20 (was C++17) for `std::span` support in Buffer.h
+3. Fixed GLAD source filename: `gl.c` (glad2 generator) instead of `glad.c`
+4. Fixed GLM include path: `${CMAKE_SOURCE_DIR}` instead of `${GLM_DIR}`
+5. Added `GLM_ENABLE_EXPERIMENTAL` for GLX extensions
+
+### t5wrapper/OptError.h
+- Added explicit constructors for functional cast syntax
+- Fixes type conversion errors in Context.cpp and Glasses.cpp
+
+---
+
+## Paddle Control Implementation Review
+
+The wand-to-paddle mapping in `src/main.cpp` looks correct:
+
+- **Wand stream**: Properly configured at lines 266-272
+- **Event reading**: Wand events read at lines 385-414
+- **Position mapping**: Uses wand X/Y directly, clamps to court bounds (lines 402-407)
+- **Paddle placement**: Rendered at player's end (z = -COURT_HALF_D)
+- **Stereo rendering**: Paddle included in both left and right eye renders
+
+### Code Quality
+- Clean implementation following project constraints
+- Minimal and explicit code
+- No over-engineering
+
+---
+
+## Recommendation
+
+**Ready to merge** once paddle control is verified on actual Tilt Five hardware.
+
+---
+
+## Setup Notes (for future builds)
+
+Dependencies need to be restored after clean:
+```powershell
+# Run setup script (or manually restore dependencies)
+./scripts/setup.ps1 -SkipTiltFive -SkipHashCheck
+
+# Copy Tilt Five NDK from your local install
+cp -r "D:/work/1_24_2026/third_party/TiltFive" "third_party/"
+
+# Configure and build
+cmake -B build -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Release
+```
+
+---
+
+Reviewed by: Claude Opus 4.5
+Date: 2026-02-02

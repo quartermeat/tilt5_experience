@@ -1,8 +1,9 @@
 #Message from Quartermeat:
-#For full transparency, this is the instructions right now for Claude
+#For full transparency, this is the instructions right now for Codex
 #The requirements for this file:
-#Claude shall modify this file
-#Claude shall not modify agents.md
+#Codex shall modify this file
+#Codex shall not modify claude.md
+
 
 # Project: Tilt Five Native Game — 3D Pong
 
@@ -179,13 +180,6 @@ Focus is always:
 
 ---
 
-## Workflow (branch + PR)
-For milestone work:
-- Create a new branch for changes
-- Open a PR back into `main` for review/testing
-
----
-
 ## Definition of success
 This project is successful when:
 - App builds cleanly
@@ -199,3 +193,18 @@ Not success:
 - Complex engine
 - Feature creep
 - Over-ambitious scope
+
+---
+
+## Shared instructions for Claude
+Claude should maintain `claude.md` with the same high-level project plan and guardrails described in this file.
+Add or update any workflow requirements for Claude there (branching, PRs, testing) to match the intent here.
+Keep `claude.md` aligned with these constraints and milestones.
+
+---
+
+## Outstanding PR review notes (from Claude)
+Do not merge until:
+- `CMakeLists.txt` includes all source files and libraries.
+- `scripts/setup.ps1` syntax error is corrected (move `$ErrorActionPreference` after `param`).
+- Paddle control code looks good; only build system fixes are needed.
