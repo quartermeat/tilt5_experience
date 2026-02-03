@@ -41,9 +41,3 @@ glad/
 glm/
 glfw-3.3.8.bin.WIN64/
 third_party/TiltFive/
-
-# Local project scaffolding (not committed)
-glwrapper/
-glapplication/
-t5wrapper/
-util/

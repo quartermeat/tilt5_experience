@@ -11,12 +11,12 @@ A tabletop 3D Pong game for Tilt Five AR glasses using the Native SDK (no Unity)
 │   └── OpenGL_4_6_Core/    # OpenGL 4.6 Core profile
 ├── glfw-3.3.8.bin.WIN64/   # Local: GLFW pre-built binaries (ignored)
 ├── glm/                    # Local: GLM math library (ignored)
-├── glwrapper/              # Local: OpenGL wrapper classes (ignored)
-├── glapplication/          # Local: Application framework (ignored)
-├── t5wrapper/              # Local: Tilt Five SDK wrapper classes (ignored)
+├── glwrapper/              # OpenGL wrapper classes (committed)
+├── glapplication/          # Application framework (committed)
+├── t5wrapper/              # Tilt Five SDK wrapper classes (committed)
 ├── third_party/
 │   └── TiltFive/           # Local: Tilt Five NDK headers + libs (ignored)
-├── util/                   # Local: Utility classes (ignored)
+├── util/                   # Utility classes (committed)
 ├── CMakeLists.txt          # Build configuration
 └── claude.md               # Project plan and milestones
 ```
@@ -33,11 +33,16 @@ If any are missing, the build will fail.
 - Download and extract GLFW into `glfw-3.3.8.bin.WIN64/`
 - Generate and extract GLAD into `glad/OpenGL_4_6_Core/`
 - Download and extract GLM into `glm/`
-- Ensure local scaffolding folders exist:
-  - `glwrapper/`
-  - `glapplication/`
-  - `t5wrapper/`
-  - `util/`
+
+Optional: run the setup helper to download/generate dependencies (except the Tilt Five NDK):
+
+```powershell
+./scripts/setup.ps1
+```
+
+Notes:
+- The script downloads GLFW and GLM from their official GitHub releases.
+- The script generates GLAD using `python -m glad` (Python required).
 
 ### Tilt Five NDK
 1. Install the Tilt Five Driver
@@ -69,12 +74,18 @@ Download from:
 - Header-only, extract to `glm/`
 
 ### Local scaffolding (project-specific)
-These folders are local and intentionally ignored by git. They are pulled from earlier development steps
-and/or copied from sample code during hardware setup:
+These folders are committed to this repo and should not be removed:
 - `glwrapper/`
 - `glapplication/`
 - `t5wrapper/`
 - `util/`
+
+## Licensing and provenance
+- `glwrapper/` — see `glwrapper/LICENSE.txt`
+- `glapplication/` — see `glapplication/LICENSE.txt`
+- `t5wrapper/` — see `t5wrapper/LICENSE.txt`
+- `Tilt Five NDK`, `GLFW`, `GLAD`, and `GLM` are third-party dependencies.
+  Keep their license files with your local copies and review their terms.
 
 ## Build
 

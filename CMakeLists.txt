@@ -6,9 +6,25 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Tilt Five NDK paths
-set(T5_NDK_DIR "${CMAKE_SOURCE_DIR}/third_party/tiltfive_ndk")
+set(T5_NDK_DIR "${CMAKE_SOURCE_DIR}/third_party/TiltFive")
 set(T5_INCLUDE_DIR "${T5_NDK_DIR}/include")
 set(T5_LIB_DIR "${T5_NDK_DIR}/lib")
+
+# Local dependencies
+set(GLAD_DIR "${CMAKE_SOURCE_DIR}/glad/OpenGL_4_6_Core")
+set(GLFW_DIR "${CMAKE_SOURCE_DIR}/glfw-3.3.8.bin.WIN64")
+set(GLM_DIR "${CMAKE_SOURCE_DIR}/glm")
+
+function(require_dir path label)
+    if (NOT EXISTS "${path}")
+        message(FATAL_ERROR "${label} not found at ${path}. Run scripts/setup.ps1 or follow README.md.")
+    endif()
+endfunction()
+
+require_dir("${T5_INCLUDE_DIR}" "Tilt Five NDK headers")
+require_dir("${GLAD_DIR}" "GLAD (generated)")
+require_dir("${GLFW_DIR}" "GLFW (prebuilt)")
+require_dir("${GLM_DIR}" "GLM (header-only)")
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
