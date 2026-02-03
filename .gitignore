@@ -35,22 +35,15 @@ Thumbs.db
 *.log
 
 # ===================
-# Third-party binaries (exclude libs, keep headers/source)
+# Local third-party dependencies (not committed)
 # ===================
+glad/
+glm/
+glfw-3.3.8.bin.WIN64/
+third_party/TiltFive/
 
-# GLFW - exclude prebuilt libs
-glfw-3.3.8.bin.WIN64/lib-*/
-
-# Tilt Five NDK - exclude libs
-third_party/TiltFive/lib/
-
-# ===================
-# Keep these (committed to repo)
-# ===================
-# glad/         - OpenGL loader (generated source)
-# glm/          - GLM math library (header-only)
-# glwrapper/    - Custom OpenGL wrappers (our code)
-# glapplication/ - Custom app framework (our code)
-# t5wrapper/    - Custom T5 wrappers (our code)
-# util/         - Utility code (our code)
-# third_party/TiltFive/include/ - T5 SDK headers
+# Local project scaffolding (not committed)
+glwrapper/
+glapplication/
+t5wrapper/
+util/

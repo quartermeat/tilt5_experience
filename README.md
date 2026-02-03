@@ -7,36 +7,42 @@ A tabletop 3D Pong game for Tilt Five AR glasses using the Native SDK (no Unity)
 ```
 ├── src/                    # Application source code
 │   └── main.cpp            # Main application entry point
-├── glad/                   # GLAD OpenGL loader (generated)
+├── glad/                   # Local: GLAD OpenGL loader (generated, ignored)
 │   └── OpenGL_4_6_Core/    # OpenGL 4.6 Core profile
-├── glfw-3.3.8.bin.WIN64/   # GLFW pre-built binaries for Windows
-├── glm/                    # GLM math library (header-only)
-├── glwrapper/              # OpenGL wrapper classes (Shader, Framebuffer, etc.)
-├── glapplication/          # Application framework (Transform, etc.)
-├── t5wrapper/              # Tilt Five SDK wrapper classes
+├── glfw-3.3.8.bin.WIN64/   # Local: GLFW pre-built binaries (ignored)
+├── glm/                    # Local: GLM math library (ignored)
+├── glwrapper/              # Local: OpenGL wrapper classes (ignored)
+├── glapplication/          # Local: Application framework (ignored)
+├── t5wrapper/              # Local: Tilt Five SDK wrapper classes (ignored)
 ├── third_party/
-│   └── TiltFive/           # Tilt Five NDK headers and libs
-├── util/                   # Utility classes (ChangeDetector, etc.)
+│   └── TiltFive/           # Local: Tilt Five NDK headers + libs (ignored)
+├── util/                   # Local: Utility classes (ignored)
 ├── CMakeLists.txt          # Build configuration
 └── claude.md               # Project plan and milestones
 ```
 
 ## Dependencies
 
+These dependencies are intentionally not committed. Each developer should install them locally.
+If any are missing, the build will fail.
+
 ### Tilt Five NDK
-1. Install Tilt Five Driver from https://www.tiltfive.com/setup
-2. Download Native Development Kit (NDK) from Tilt Five developer portal
-3. Copy to `third_party/TiltFive/`:
-   - `include/` — SDK headers
-   - `lib/win/x86_64/` — Windows x64 libraries (.lib, .dll)
+1. Install the Tilt Five Driver
+   - `https://www.tiltfive.com/setup`
+2. Download the Native Development Kit (NDK) from the Tilt Five developer portal
+3. Copy the SDK into `third_party/TiltFive/` with this layout:
+   - `third_party/TiltFive/include/` — SDK headers
+   - `third_party/TiltFive/lib/win/x86_64/` — Windows x64 libraries (.lib, .dll)
 
 ### GLFW (pre-built)
-Download from https://www.glfw.org/download.html
+Download from:
+`https://www.glfw.org/download.html`
 - Version: 3.3.8 (Windows 64-bit binaries)
 - Extract to `glfw-3.3.8.bin.WIN64/`
 
 ### GLAD (OpenGL loader)
-Generate at https://glad.dav1d.de/
+Generate at:
+`https://glad.dav1d.de/`
 - Language: C/C++
 - Specification: OpenGL
 - Profile: Core
@@ -45,8 +51,17 @@ Generate at https://glad.dav1d.de/
 - Extract to `glad/OpenGL_4_6_Core/`
 
 ### GLM (math library)
-Download from https://github.com/g-truc/glm/releases
+Download from:
+`https://github.com/g-truc/glm/releases`
 - Header-only, extract to `glm/`
+
+### Local scaffolding (project-specific)
+These folders are local and intentionally ignored by git. They are pulled from earlier development steps
+and/or copied from sample code during hardware setup:
+- `glwrapper/`
+- `glapplication/`
+- `t5wrapper/`
+- `util/`
 
 ## Build
 
@@ -74,7 +89,7 @@ Requires:
 - Wireframe court bounds rendered (0.40m × 0.25m × 0.60m)
 - Fixed in world space above gameboard
 
-**Milestone 2 — Paddle control** (next)
+**Milestone 2 — Paddle control** ✓
 - Read wand pose
 - Map to paddle position
 
