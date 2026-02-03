@@ -37,6 +37,12 @@ constexpr float COURT_DEPTH  = 0.60f;  // Z: toward/away
 constexpr float COURT_HALF_W = COURT_WIDTH / 2.0f;
 constexpr float COURT_HALF_D = COURT_DEPTH / 2.0f;
 
+// Paddle dimensions
+constexpr float PADDLE_WIDTH  = 0.08f;  // X size
+constexpr float PADDLE_HEIGHT = 0.06f;  // Y size
+constexpr float PADDLE_HALF_W = PADDLE_WIDTH / 2.0f;
+constexpr float PADDLE_HALF_H = PADDLE_HEIGHT / 2.0f;
+
 // Simple vertex with position and color
 struct Vertex {
     float x, y, z;
@@ -85,6 +91,20 @@ const Vertex courtVertices[] = {
     {-COURT_HALF_W, COURT_HEIGHT,  COURT_HALF_D,   0.0f, 0.8f, 0.8f},
 };
 constexpr int COURT_VERTEX_COUNT = sizeof(courtVertices) / sizeof(courtVertices[0]);
+
+// Paddle vertices - quad centered at origin (will be translated by model matrix)
+// Color: bright green for player paddle
+const Vertex paddleVertices[] = {
+    // First triangle
+    {-PADDLE_HALF_W, -PADDLE_HALF_H, 0.0f,   0.2f, 1.0f, 0.2f},
+    { PADDLE_HALF_W, -PADDLE_HALF_H, 0.0f,   0.2f, 1.0f, 0.2f},
+    { PADDLE_HALF_W,  PADDLE_HALF_H, 0.0f,   0.2f, 1.0f, 0.2f},
+    // Second triangle
+    {-PADDLE_HALF_W, -PADDLE_HALF_H, 0.0f,   0.2f, 1.0f, 0.2f},
+    { PADDLE_HALF_W,  PADDLE_HALF_H, 0.0f,   0.2f, 1.0f, 0.2f},
+    {-PADDLE_HALF_W,  PADDLE_HALF_H, 0.0f,   0.2f, 1.0f, 0.2f},
+};
+constexpr int PADDLE_VERTEX_COUNT = sizeof(paddleVertices) / sizeof(paddleVertices[0]);
 
 const char* vertexShaderSrc = R"(
 #version 330 core
@@ -242,6 +262,15 @@ int main() {
     float ipd = glasses.GetIpd();
     std::cout << "IPD: " << ipd << "m" << std::endl;
 
+    // Configure wand stream
+    t5Result = glasses.ConfigureWandStream(true);
+    if (t5Result != T5_SUCCESS) {
+        std::cerr << "Failed to configure wand stream: " << t5GetResultMessage(t5Result) << std::endl;
+        // Non-fatal - continue without wand
+    } else {
+        std::cout << "Wand stream enabled" << std::endl;
+    }
+
     // Create framebuffers for each eye
     EyeFramebuffer leftEye, rightEye;
     if (!leftEye.create(T5_WIDTH, T5_HEIGHT) || !rightEye.create(T5_WIDTH, T5_HEIGHT)) {
@@ -299,6 +328,22 @@ int main() {
 
     glBindVertexArray(0);
 
+    // Create vertex buffer and array for paddle
+    GLuint paddleVbo, paddleVao;
+    glGenBuffers(1, &paddleVbo);
+    glGenVertexArrays(1, &paddleVao);
+
+    glBindVertexArray(paddleVao);
+    glBindBuffer(GL_ARRAY_BUFFER, paddleVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(paddleVertices), paddleVertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
+
     glEnable(GL_DEPTH_TEST);
 
     // Transforms
@@ -309,6 +354,10 @@ int main() {
 
     ChangeDetector<bool> isPoseValid;
     ChangeDetector<bool> isFrameSent;
+    ChangeDetector<bool> isWandConnected;
+
+    // Paddle state - position in court space
+    glm::vec2 paddlePos(0.0f, COURT_HEIGHT / 2.0f);  // Start centered
 
     std::cout << "Starting render loop. Press ESC to exit." << std::endl;
 
@@ -333,6 +382,37 @@ int main() {
             std::cout << (isPoseValid ? "Tracking acquired" : "Tracking lost") << std::endl;
         }
 
+        // Read wand events (drain the queue)
+        T5_WandStreamEvent wandEvent;
+        while (true) {
+            auto wandResult = glasses.ReadWandStream(0);
+            if (!wandResult.TryGet(wandEvent)) break;
+
+            if (wandEvent.type == kT5_WandStreamEventType_Connect) {
+                isWandConnected = true;
+            } else if (wandEvent.type == kT5_WandStreamEventType_Disconnect) {
+                isWandConnected = false;
+            } else if (wandEvent.type == kT5_WandStreamEventType_Report) {
+                if (wandEvent.report.poseValid) {
+                    // Map wand aim position to paddle position
+                    // Wand reports position in gameboard space (GBD)
+                    glm::vec3 wandPos = T5W::toGLM(wandEvent.report.posAim_GBD);
+
+                    // Use wand X/Y directly, clamp to court bounds
+                    paddlePos.x = glm::clamp(wandPos.x,
+                        -COURT_HALF_W + PADDLE_HALF_W,
+                         COURT_HALF_W - PADDLE_HALF_W);
+                    paddlePos.y = glm::clamp(wandPos.y,
+                        PADDLE_HALF_H,
+                        COURT_HEIGHT - PADDLE_HALF_H);
+                }
+            }
+        }
+
+        if (isWandConnected.IsChanged()) {
+            std::cout << (isWandConnected ? "Wand connected" : "Wand disconnected") << std::endl;
+        }
+
         // Animation: rotate triangle over time
         float time = (float)glfwGetTime();
         glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0.15f)); // Hover above board
@@ -353,6 +433,12 @@ int main() {
         glm::mat4 courtMvpLeft = projection * viewLeft;
         glm::mat4 courtMvpRight = projection * viewRight;
 
+        // Paddle model matrix - position at player's end of court
+        glm::mat4 paddleModel = glm::translate(glm::mat4(1.0f),
+            glm::vec3(paddlePos.x, paddlePos.y, -COURT_HALF_D));
+        glm::mat4 paddleMvpLeft = projection * viewLeft * paddleModel;
+        glm::mat4 paddleMvpRight = projection * viewRight * paddleModel;
+
         // Render to left eye
         leftEye.bind();
         glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
@@ -364,7 +450,12 @@ int main() {
         glBindVertexArray(courtVao);
         glDrawArrays(GL_LINES, 0, COURT_VERTEX_COUNT);
 
-        // Draw triangle (animated)
+        // Draw paddle
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(paddleMvpLeft));
+        glBindVertexArray(paddleVao);
+        glDrawArrays(GL_TRIANGLES, 0, PADDLE_VERTEX_COUNT);
+
+        // Draw triangle (animated) - kept for reference
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvpLeft));
         glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -381,7 +472,12 @@ int main() {
         glBindVertexArray(courtVao);
         glDrawArrays(GL_LINES, 0, COURT_VERTEX_COUNT);
 
-        // Draw triangle (animated)
+        // Draw paddle
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(paddleMvpRight));
+        glBindVertexArray(paddleVao);
+        glDrawArrays(GL_TRIANGLES, 0, PADDLE_VERTEX_COUNT);
+
+        // Draw triangle (animated) - kept for reference
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvpRight));
         glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -444,6 +540,8 @@ int main() {
     glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &courtVao);
     glDeleteBuffers(1, &courtVbo);
+    glDeleteVertexArrays(1, &paddleVao);
+    glDeleteBuffers(1, &paddleVbo);
     glDeleteProgram(shaderProgram);
     glasses.Release();
     glfwDestroyWindow(window);
