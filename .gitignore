@@ -41,3 +41,4 @@ glad/
 glm/
 glfw-3.3.8.bin.WIN64/
 third_party/TiltFive/
+/.claude/settings.local.json
