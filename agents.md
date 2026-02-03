@@ -200,3 +200,11 @@ Not success:
 Claude should maintain `claude.md` with the same high-level project plan and guardrails described in this file.
 Add or update any workflow requirements for Claude there (branching, PRs, testing) to match the intent here.
 Keep `claude.md` aligned with these constraints and milestones.
+
+---
+
+## Outstanding PR review notes (from Claude)
+Do not merge until:
+- `CMakeLists.txt` includes all source files and libraries.
+- `scripts/setup.ps1` syntax error is corrected (move `$ErrorActionPreference` after `param`).
+- Paddle control code looks good; only build system fixes are needed.

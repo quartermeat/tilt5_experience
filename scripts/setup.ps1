@@ -1,5 +1,3 @@
-$ErrorActionPreference = "Stop"
-
 param(
     [switch]$SkipGlfw,
     [switch]$SkipGlm,
@@ -9,6 +7,8 @@ param(
     [string]$GlmSha256,
     [switch]$SkipHashCheck
 )
+
+$ErrorActionPreference = "Stop"
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 
