@@ -43,6 +43,14 @@ Optional: run the setup helper to download/generate dependencies (except the Til
 Notes:
 - The script downloads GLFW and GLM from their official GitHub releases.
 - The script generates GLAD using `python -m glad` (Python required).
+- For integrity, pass expected SHA256 hashes:
+  - `./scripts/setup.ps1 -GlfwSha256 <hash> -GlmSha256 <hash>`
+
+To validate an existing local setup without downloading:
+
+```powershell
+./scripts/verify_deps.ps1
+```
 
 ### Tilt Five NDK
 1. Install the Tilt Five Driver

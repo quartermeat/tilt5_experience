@@ -4,7 +4,10 @@ param(
     [switch]$SkipGlfw,
     [switch]$SkipGlm,
     [switch]$SkipGlad,
-    [switch]$SkipTiltFive
+    [switch]$SkipTiltFive,
+    [string]$GlfwSha256,
+    [string]$GlmSha256,
+    [switch]$SkipHashCheck
 )
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
@@ -15,10 +18,27 @@ function Ensure-Dir($Path) {
     }
 }
 
-function Download-And-ExtractZip($Url, $DestinationDir) {
+function Assert-HashOrStop($Path, $Expected, $Label) {
+    if ($SkipHashCheck) {
+        Write-Host "Skipping hash check for $Label"
+        return
+    }
+    if (-not $Expected) {
+        $actual = (Get-FileHash -Algorithm SHA256 -Path $Path).Hash
+        Write-Host "$Label SHA256: $actual"
+        Write-Error "Missing expected SHA256 for $Label. Re-run with -${Label}Sha256 <hash>."
+    }
+    $actual = (Get-FileHash -Algorithm SHA256 -Path $Path).Hash
+    if ($actual -ne $Expected) {
+        Write-Error "$Label SHA256 mismatch. Expected: $Expected. Actual: $actual"
+    }
+}
+
+function Download-And-ExtractZip($Url, $DestinationDir, $ExpectedHash, $Label) {
     $tmp = Join-Path $env:TEMP ([System.IO.Path]::GetRandomFileName() + ".zip")
     Write-Host "Downloading $Url"
     Invoke-WebRequest -Uri $Url -OutFile $tmp
+    Assert-HashOrStop $tmp $ExpectedHash $Label
     Ensure-Dir $DestinationDir
     Expand-Archive -Path $tmp -DestinationPath $DestinationDir -Force
     Remove-Item $tmp -Force
@@ -32,7 +52,7 @@ function Ensure-Glfw {
     }
 
     $url = "https://github.com/glfw/glfw/releases/download/3.3.8/glfw-3.3.8.bin.WIN64.zip"
-    Download-And-ExtractZip $url $RepoRoot
+    Download-And-ExtractZip $url $RepoRoot $GlfwSha256 "Glfw"
 }
 
 function Ensure-Glm {
@@ -43,7 +63,7 @@ function Ensure-Glm {
     }
 
     $url = "https://github.com/g-truc/glm/releases/download/0.9.9.9/glm-0.9.9.9.zip"
-    Download-And-ExtractZip $url $RepoRoot
+    Download-And-ExtractZip $url $RepoRoot $GlmSha256 "Glm"
 
     # The archive extracts to glm/ by default; keep that folder name.
 }
