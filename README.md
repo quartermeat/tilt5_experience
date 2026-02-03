@@ -26,6 +26,19 @@ A tabletop 3D Pong game for Tilt Five AR glasses using the Native SDK (no Unity)
 These dependencies are intentionally not committed. Each developer should install them locally.
 If any are missing, the build will fail.
 
+## Setup Checklist
+
+- Install Tilt Five Driver
+- Install Tilt Five NDK and copy into `third_party/TiltFive/`
+- Download and extract GLFW into `glfw-3.3.8.bin.WIN64/`
+- Generate and extract GLAD into `glad/OpenGL_4_6_Core/`
+- Download and extract GLM into `glm/`
+- Ensure local scaffolding folders exist:
+  - `glwrapper/`
+  - `glapplication/`
+  - `t5wrapper/`
+  - `util/`
+
 ### Tilt Five NDK
 1. Install the Tilt Five Driver
    - `https://www.tiltfive.com/setup`
